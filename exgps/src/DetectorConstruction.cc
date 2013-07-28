@@ -127,7 +127,36 @@ void DetectorConstruction::set_histo(const double min,
   d_hist_bins = n_bins;
   d_energy_units = E_units;
 }
-  
+//-----------------------------------------------------------------------------
+
+/** This macros adds new sensitive detector.
+ *  @param detName: (G4String) detector's name.
+ *  @param detMaterialPtr: (G4Material*) pointer to detector's material.
+ *  @param centerPlacement: (G4ThreeVector) radius vector of the detector's center.
+ *  @param cylinderDiameter: (float)diameter of the detector's cylinder.
+ *  @param cylinderHeight: (float) height of the detector's cylinder.
+**/
+DetectorSD2 * DetectorConstruction::CreateNewDetector(G4LogicalVolume *worldLogical,
+                                                      G4String detName,
+                                                      G4Material * detMaterialPtr,
+                                                      G4ThreeVector centerPlacement,
+                                                      G4double cylinderDiameter,
+                                                      G4double cylinderHeight)
+{
+  /** detector logical volume.*/
+  G4LogicalVolume *detectorLogicalPointer;
+  g4solid_object<G4Tubs> *detectorCylinder;
+
+  detectorCylinder =   make_cylinder(worldLogical,
+                                     detName + G4String("_cylinder"),
+                                     detMaterialPtr,  centerPlacement, cylinderDiameter, cylinderHeight);
+
+  DetectorSD2 *sd2Pointer = new_detector_sensitive(detName);
+  detectorLogicalPointer = detectorCylinder->get_logical();
+  detectorLogicalPointer->SetSensitiveDetector(sd2Pointer);
+  return sd2Pointer;
+  }
+//-------------------------------------------------------------------------------
 
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
@@ -136,8 +165,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4SDManager *det_manager = G4SDManager::GetSDMpointer();
 
   // --- materials ---
-  // создаем материалы
-  // первый способ:
+  // первший спосіб, за хімічними елементами:
   G4Element *N    = new G4Element("Nitrogen", "N", 7, 14.01*g/mole);
   G4Element *O    = new G4Element("Oxygen"  , "O", 8, 16.00*g/mole);
   G4Material *Air = new G4Material("Air", 1.29*mg/cm3, 2);
@@ -148,30 +176,26 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Material *void_dumb_material =  new G4Material("dumb_void", 1e-10*g/cm3, 1);
   void_dumb_material->AddElement(H,1);
   
-  // второй способ: использует встроенную в Geant4 базу материалов
-  // более простой, но иногда приходится прибегать к первому способу,
-  // т.к. не все материалы содержатся в базе
+  // другий спосіб: використовуючи базу готових матеріалів.
   G4NistManager *nistMan = G4NistManager::Instance();
-
   G4Material *Fe_material= nistMan->FindOrBuildMaterial("G4_Fe");
   G4Material *Poly_material= nistMan->FindOrBuildMaterial("G4_POLYETHYLENE");
   G4Material *concreteMaterial = nistMan->FindOrBuildMaterial("G4_CONCRETE");
   G4Material *detector_material = nistMan->FindOrBuildMaterial("G4_In");
   
   //---------------------------------------------------------------
-  // создаем геометрию
+  // робимо геометрію
   //---------------------------------------------------------------
 
-
   //-------- world box-------------------------
-  // тут будуть розташовані всі об'єкти:
+  // світ -- він і є "світ", тут будуть розташовані всі об'єкти:
   G4Box *world_box = new G4Box("WORLD_BOX",
 			       //3 параметри паралелепіпеда X,Y,Z
 			       20.15*m,
 			       20.15*m,
 			       20.15*m);
 
-  // заполним воздухом лабораторию:
+  // заповним повітрям лабораторию:
   G4LogicalVolume *world_logical_volume =
     new G4LogicalVolume(world_box, Air,	"WORLD_LOG");
   
@@ -182,56 +206,48 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 		       "WORLD_PHYS",
 		       0, false, 0);
   //------------ Objects ---------------------------------------------------
-//   g4solid_object<G4Box> *plita = 
-//       make_box(world_logical_volume,
-// 	       "plita",
-// 	       concreteMaterial,
-// 	       G4ThreeVector(0,0,-4.65*m), 1.5 *m, 1.5 *m, 0.1 *m);
-// //z=-4.65*m
+   g4solid_object<G4Box> *plita =
+       make_box(world_logical_volume,
+               "plita",
+               concreteMaterial,
+               /*розташування, радіус-вектор до центру:*/G4ThreeVector(0,0,-4.65*m),
+               /*3D-розміри ПОЛОВИННІ коробки: (X/2,Y/2,Z/2) */1.5 *m, 1.5 *m, 0.1 *m);
+ //z=-4.65*m
 
-//   g4solid_object<G4Box> *febox = 
-//       make_box(world_logical_volume,
-// 	       "febox",
-// 	       Fe_material,
-// 	       G4ThreeVector(0,0, -10.15 *m), 1 *m, 1 *m, 1 *m);
+   g4solid_object<G4Box> *febox =
+       make_box(world_logical_volume,
+               "febox",
+               Fe_material,
+               G4ThreeVector(0,0, -10.15 *m), 1 *m, 1 *m, 1 *m);
   
 
   G4ThreeVector polyboxCenter = G4ThreeVector(0,0, -10.15 *m);
-  /** This function makes a box with a hole*/
+  /** This function makes a box with a hole inside (shaped as box too).*/
   make_box_with_hole( world_logical_volume,
 		      "polybox",
 		      Poly_material,
 		      polyboxCenter /*box center*/,
+		      /*ЦЕ САМОПАЛЬНА Ф-ЦІЯ, ТУТ ПОВНІ РОЗМІРИ КОРОБОК(НЕ ПОЛОВИННІ)*/
 		      G4ThreeVector(900*cm, 900*cm, 900*cm) /*box dimensions(width, height, depth)*/,
 		      G4ThreeVector(170*cm, 170*cm, 170*cm)/*hole dimensions(width, height, depth)*/,
 		      NULL, NULL);
 
-  DetectorSD2  *sd2Pointer;
-  G4LogicalVolume *detectorLogicalPointer;
-  g4solid_object<G4Tubs> *detectorCylinder;
-
-/** This macros adds new sensitive detector.**/
-#define ADD_NEW_DETECTOR(_NAME_, _MATERIAL_, _PLACEMENT_, _DIAMETER_, _HEIGHT_)	\
-									\
-  detectorCylinder =   make_cylinder(world_logical_volume,		\
-				     _NAME_ + G4String("_cylinder"),	\
-				     _MATERIAL_,  _PLACEMENT_, _DIAMETER_, _HEIGHT_); \
-									\
-  sd2Pointer = new_detector_sensitive(_NAME_);				\
-  det_manager->AddNewDetector(sd2Pointer);				\
-  detectorLogicalPointer = detectorCylinder->get_logical();		\
-  detectorLogicalPointer->SetSensitiveDetector(sd2Pointer);		\
-  vector_DetectorSD.push_back(sd2Pointer);
-
   /* Detector inside the box. */
-  ADD_NEW_DETECTOR("DET.INSIDE", void_dumb_material, G4ThreeVector(0,0,-10.15*m), 1.3*m, 10*cm);
-  /* Make detector virtual (counts onyl kinetic energy)*/
-  sd2Pointer->DisableDepositedEnergyCount();
+  DetectorSD2  *sensDetectorPtr =
+      CreateNewDetector(world_logical_volume,
+                        "DET.INSIDE",
+                        /*void material, this detector is virtual:*/void_dumb_material,
+                        /*placement:*/G4ThreeVector(0,0,-10.15*m),
+                        /*cylinder diameter*/1.3*m,
+                        /*cylinder height*/  10*cm);
 
-  /*--- Detector inside the box.--- */
-  ADD_NEW_DETECTOR("DET.SOURCE", void_dumb_material, G4ThreeVector(0,0,0), 1.3*m, 10*cm);
-  /* Make detector virtual (counts onyl kinetic energy)*/
-  sd2Pointer->DisableDepositedEnergyCount();
+  /*Register new detector in DetectorManager:*/
+  det_manager->AddNewDetector(sensDetectorPtr);
+  /*Register this 'virtual' detector in array, this will let SteppingAction class
+    to store information about particles to known detectors.*/
+  vector_DetectorSD.push_back(sensDetectorPtr);
+  /* Make detector virtual (counts only kinetic energy, no deposited energy)*/
+  sensDetectorPtr->DisableDepositedEnergyCount();
 
   return world_physical_volume;
 }

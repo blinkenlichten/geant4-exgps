@@ -130,6 +130,20 @@ protected:
      
   */
   DetectorSD2 * new_detector_sensitive(const G4String name);
+
+  /** This macros adds new sensitive detector.
+   *  @param detName: (G4String) detector's name.
+   *  @param detMaterialPtr: (G4Material*) pointer to detector's material.
+   *  @param centerPlacement: (G4ThreeVector) radius vector of the detector's center.
+   *  @param cylinderDiameter: (float)diameter of the detector's cylinder.
+   *  @param cylinderHeight: (float) height of the detector's cylinder.
+  **/
+  DetectorSD2 * CreateNewDetector(G4LogicalVolume *worldLogical,
+                                  G4String detName,
+                                  G4Material * detMaterialPtr,
+                                  G4ThreeVector centerPlacement,
+                                  G4double cylinderDiameter,
+                                  G4double cylinderHeight);
   
 private:
 
