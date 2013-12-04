@@ -48,7 +48,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
       It will be filled on this->Construct() method call.
       Address of this object may be passed to other places.
    */
-  std::vector<DetectorSD2*> vector_DetectorSD;
+  std::vector<DetectorSD2*> pbDetectorSDArray;
 
 
   /** 
@@ -71,7 +71,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
       \param std::map reference(a container with G4String and G4double pairs).
 
   */
-  void read_parameters(const std::map<G4String, G4double> &str_double_map);
+  void readParameters(const std::map<G4String, G4double> &str_double_map);
   
   /** Set histogram properties.
       \param minimum value of range. 
@@ -84,42 +84,29 @@ class DetectorConstruction : public G4VUserDetectorConstruction
       
       \param energy units: 0 -- eV, 1 -- keV, 2 -- MeV
   */
-  void set_histo(const double min, const double max,
+  void setHistoRanges(const double min, const double max,
 		 const unsigned int n_bins, 
 		 const unsigned int E_units=1);
   
   /** Set number of histogram bins.
       \param quantity of bins.
    */
-  void set_histo_bins(const G4int bins)
-  {
-    d_hist_bins = bins;
-  }
+  void setHistoBinsQuantity(const G4int bins);
 
   /** Set number of histogram min value.
       \param a value in units that are currently set, keV by default.
    */
-  void set_histo_min(const G4double min)
-  {
-    d_hist_min = min;
-  }
+  void setHistoEnergyMinimum(const G4double min);
 
   /** Set number of histogram max value.
       \param a value in units that are currently set, keV by default.
    */
-  void set_histo_max(const G4double max)
-  {
-    d_hist_max = max;
-  }
-
+  void setHistoEnergyMaximum(const G4double max);
 
   /**Return value of energy units used.
      \return energy units used: case 0: eV, case 1: keV, case 2: MeV.
    */
-  unsigned hist_energy_units()
-  {
-    return d_energy_units;
-  }
+  unsigned getHistoEnergyUnits();
   
 protected:
   /**
@@ -129,7 +116,7 @@ protected:
      \param name of the sensitive region
      
   */
-  DetectorSD2 * new_detector_sensitive(const G4String name);
+  DetectorSD2 * newRegisteredDetectorSD2(const G4String name);
 
   /** This macros adds new sensitive detector.
    *  @param detName: (G4String) detector's name.
@@ -138,7 +125,7 @@ protected:
    *  @param cylinderDiameter: (float)diameter of the detector's cylinder.
    *  @param cylinderHeight: (float) height of the detector's cylinder.
   **/
-  DetectorSD2 * CreateNewDetector(G4LogicalVolume *worldLogical,
+  DetectorSD2 * newCylindricDetector(G4LogicalVolume *worldLogical,
                                   G4String detName,
                                   G4Material * detMaterialPtr,
                                   G4ThreeVector centerPlacement,

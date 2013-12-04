@@ -11,7 +11,7 @@
    @param placement: vector of placement in world;
    @param outer_radius: Radius of the cylinder (1*cm by default)
    @param height: Height of the cylinder (1*cm by default)
-     
+
    @param inner_radius: (Optional)Inner radius of the cylinder (0*cm by default, solid)
    @param pRot: pointer to rotation matrix.
    @param uncut_angle_start: (Optional)uncut matter of cylinder start -- 0*deg by default.
@@ -20,11 +20,11 @@
    @param uncut_angle_end: end of the angle cut, usually 360deg.
 
    @param Pointer to G4RotationMatrix, if not 0, then the object will be rotated.
-     
+
    @param (Optional)uncut matter of cylinder start -- 360*deg by default
    It's needed when you make a sectorial cut of cylinder.
    This value means TO what value of angle the cylinder matter is present.
-	    
+
    \return A pointer to object of class 'g4solid_object<G4Tubs>'.
    See "g4solid_object.hh"!
    To use that object later you just call it's method:
@@ -33,17 +33,16 @@
    G4VPhysicalVolume *pointer_physical).
 
 */
-g4solid_object<G4Tubs> * make_cylinder
-              ( G4LogicalVolume *WORLD_LOGICAL,
-		const G4String name,
-		G4Material *material,
-		const G4ThreeVector placement,
-		const G4double outer_radius = 1*cm,
-		const G4double height = 1*cm,
-		const G4double inner_radius = 0*cm,
-		G4RotationMatrix *pRot = 0,
-		const G4double uncut_angle_start = 0*deg,
-		const G4double uncut_angle_end = 360*deg);
+g4solid_object<G4Tubs> * make_cylinder ( G4LogicalVolume *WORLD_LOGICAL,
+                                         const G4String name,
+                                         G4Material *material,
+                                         const G4ThreeVector placement,
+                                         const G4double outer_radius = 1*cm,
+                                         const G4double height = 1*cm,
+                                         const G4double inner_radius = 0*cm,
+                                         G4RotationMatrix *pRot = 0,
+                                         const G4double uncut_angle_start = 0*deg,
+                                         const G4double uncut_angle_end = 360*deg);
 
 /**
    Make a box. Function takes 7 important parametrs.
@@ -65,13 +64,36 @@ g4solid_object<G4Tubs> * make_cylinder
    G4VPhysicalVolume *pointer_physical).
 */
 g4solid_object<G4Box> * make_box( G4LogicalVolume *WORLD_LOGICAL,
-				  const G4String name,
-				  G4Material *material,
-				  const G4ThreeVector placement,
-				  const G4double x,
-				  const G4double y,
-				  const G4double z,
-				  G4RotationMatrix *pRot = 0);
+                                  const G4String name,
+                                  G4Material *material,
+                                  const G4ThreeVector placement,
+                                  const G4double x,
+                                  const G4double y,
+                                  const G4double z,
+                                  G4RotationMatrix *pRot = 0);
+/**
+   Make a box..
+   @param WORLD_LOGICAL: Pointer to the worlds logical volume.
+   @param name: name of object.
+   @param material: material pointer.
+   @param placement: radius vector of placement in world, it points to object's center;
+   @param boxHalfSizes: vector of half sizes of the box (x/2, y/2, z/2).
+   @param Pointer to G4RotationMatrix that equals 0 by default; if not 0,
+   then the object will be rotated.
+
+   \return A pointer to object of class 'g4solid_object<G4Box>'.
+   See "g4solid_object.hh"!
+   To use that object later you just call it's method:
+   object->get(  G4Box *pointer_tubs,
+   G4LogicalVolume *pointer_logical,
+   G4VPhysicalVolume *pointer_physical).
+*/
+g4solid_object<G4Box> * make_box( G4LogicalVolume *WORLD_LOGICAL,
+                                  const G4String name,
+                                  G4Material *material,
+                                  const G4ThreeVector placement,
+                                  const G4ThreeVector boxHalfSizes,
+                                  G4RotationMatrix *pRot = 0);
 
 /**
    Make a cylinder. Function takes 6 important parametrs + 3 optional.
@@ -85,12 +107,12 @@ g4solid_object<G4Box> * make_box( G4LogicalVolume *WORLD_LOGICAL,
 
    @param outer_radius: Radius of the cylinder (1*cm by default)
    @param height: Height of the cylinder (1*cm by default)
-     
+
    @param inner_radius: (Optional)Inner radius of the cylinder (0*cm by default, solid)
    @param uncut_angle_start: (Optional)uncut matter of cylinder start -- 0*deg by default.
    It's needed when you make a sectorial cut of cylinder.
    This value means FROM what value of angle the cylinder matter is present.
-     
+
    @param uncut_angle_end: (Optional)uncut matter of cylinder start -- 360*deg by default
    It's needed when you make a sectorial cut of cylinder.
    This value means TO what value of angle the cylinder matter is present.
@@ -102,16 +124,15 @@ g4solid_object<G4Box> * make_box( G4LogicalVolume *WORLD_LOGICAL,
    G4LogicalVolume *pointer_logical,
    G4VPhysicalVolume *pointer_physical).
 */
-g4solid_object<G4Tubs> *make_cylinder
-             ( G4LogicalVolume *WORLD_LOGICAL,
-	       const G4String name,
-	       G4Material *material,
-	       const G4Transform3D transform,
-	       const G4double outer_radius = 1*cm,
-	       const G4double height = 1*cm,
-	       const G4double inner_radius = 0*cm,
-	       const G4double uncut_angle_start = 0*deg,
-	       const G4double uncut_angle_end = 360*deg);
+g4solid_object<G4Tubs> *make_cylinder ( G4LogicalVolume *WORLD_LOGICAL,
+                                        const G4String name,
+                                        G4Material *material,
+                                        const G4Transform3D transform,
+                                        const G4double outer_radius = 1*cm,
+                                        const G4double height = 1*cm,
+                                        const G4double inner_radius = 0*cm,
+                                        const G4double uncut_angle_start = 0*deg,
+                                        const G4double uncut_angle_end = 360*deg);
 
 /**
    Make a box. Function takes 7 important parametrs.
@@ -123,8 +144,8 @@ g4solid_object<G4Tubs> *make_cylinder
    G4RotationMatrix rot_matrix;
    rot_matrix.rotateZ(20*deg);
    G4Transform3D transform = G4Transform3D(rot_matrix,G4ThreeVector(x,y,z))
-     
-   @param Pointer to G4RotationMatrix, if not 0, 
+
+   @param Pointer to G4RotationMatrix, if not 0,
    then the object will be rotated.
 
    \return A pointer to object of class 'g4solid_object<G4Box>'.
@@ -134,14 +155,13 @@ g4solid_object<G4Tubs> *make_cylinder
    G4LogicalVolume *pointer_logical,
    G4VPhysicalVolume *pointer_physical).
 */
-g4solid_object<G4Box> * make_box
-        ( G4LogicalVolume *WORLD_LOGICAL,
-	  const G4String name,
-	  G4Material *material,
-	  const G4Transform3D transform,
-	  const G4double x,
-	  const G4double y,
-	  const G4double z );
+g4solid_object<G4Box> * make_box ( G4LogicalVolume *WORLD_LOGICAL,
+                                   const G4String name,
+                                   G4Material *material,
+                                   const G4Transform3D transform,
+                                   const G4double x,
+                                   const G4double y,
+                                   const G4double z );
 
 /** This funcion makes a box with a hole. Caller should provide box size, hole size,
     hole's center = box center.
@@ -157,13 +177,13 @@ g4solid_object<G4Box> * make_box
 
  */
 void make_box_with_hole( G4LogicalVolume *WORLD_LOGICAL,
-			 const G4String name,
-			 G4Material *material,
-			 const G4ThreeVector placement,
-			 G4ThreeVector BoxDimensions,
-			 G4ThreeVector HoleDimensions,
-			 std::vector< g4solid_object<G4Box>* > *PVectorOfPointers = NULL,
-			 G4RotationMatrix *pRot = NULL);
+                         const G4String name,
+                         G4Material *material,
+                         const G4ThreeVector placement,
+                         G4ThreeVector BoxDimensions,
+                         G4ThreeVector HoleDimensions,
+                         std::vector< g4solid_object<G4Box>* > *PVectorOfPointers = NULL,
+                         G4RotationMatrix *pRot = NULL);
 
 
 #endif

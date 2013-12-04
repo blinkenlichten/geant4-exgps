@@ -136,7 +136,7 @@ int main(int argc, char** argv)
   // //set construction's configuration from the map with params:
   // construction_unit->read_parameters(str_double_map);
 
-  construction_unit->set_histo(0,MAX_HIST,12500,1);
+  construction_unit->setHistoRanges(0,MAX_HIST,12500,1);
 
   
   PrimaryGeneratorAction *gen_action = new PrimaryGeneratorAction();
@@ -156,14 +156,14 @@ int main(int argc, char** argv)
      assign pointer std::vector<DetectorSD*> *DSD_vector
      from RunAction class to make histograms from detector data:
   **/
-  userAction->DSD_vector = &construction_unit->vector_DetectorSD;
+  userAction->DSD_vector = &construction_unit->pbDetectorSDArray;
   runManager->SetUserAction(userAction);
   
   SteppingAction *userSteppingAction = new SteppingAction();
   /** Assign vector of special detection counters which only
       track kinetic energy of incoming particles with no interaction:
   **/
-  userSteppingAction->SetDetectorSD(&construction_unit->vector_DetectorSD);
+  userSteppingAction->SetDetectorSD(&construction_unit->pbDetectorSDArray);
   runManager->SetUserAction(userSteppingAction);
   
 

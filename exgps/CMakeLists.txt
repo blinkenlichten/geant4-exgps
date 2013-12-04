@@ -16,7 +16,13 @@ if(WITH_GEANT4_UIVIS)
 else()
   find_package(Geant4 REQUIRED)
 endif()
-
+if(DEBUG_MODE)
+  set(CMAKE_BUILD_TYPE  "Debug")
+  add_definitions("-g -O0 -DDEBUG_BUILD")
+else()
+  set(CMAKE_BUILD_TYPE  "Release")
+  add_definitions("-O3")
+endif()
 #----------------------------------------------------------------------------
 # Setup Geant4 include directories and compile definitions
 # Setup include directory for this project

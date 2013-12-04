@@ -119,6 +119,17 @@ g4solid_object<G4Box> * make_box(G4LogicalVolume *WORLD_LOGICAL,
   korobka->set(pbox, logical, physical);
   return korobka;
 }
+g4solid_object<G4Box> * make_box( G4LogicalVolume *WORLD_LOGICAL,
+                                  const G4String name,
+                                  G4Material *material,
+                                  const G4ThreeVector placement,
+                                  const G4ThreeVector boxHalfSizes,
+                                  G4RotationMatrix *pRot)
+{
+    return make_box(WORLD_LOGICAL, name, material, placement,
+                    boxHalfSizes.x(), boxHalfSizes.y(), boxHalfSizes.z(),
+                    pRot);
+}
 //-------
 
 g4solid_object<G4Box> * make_box( G4LogicalVolume *WORLD_LOGICAL,

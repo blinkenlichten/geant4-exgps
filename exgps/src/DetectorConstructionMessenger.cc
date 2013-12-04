@@ -79,14 +79,14 @@ void DetectorConstructionMessenger::SetNewValue(G4UIcommand* command,G4String ne
 { 
   
   if(command == cmd_histo_bins)
-    detector -> set_histo_bins
+    detector -> setHistoBinsQuantity
       (cmd_histo_bins -> GetNewIntValue(newValue));
   
   if(command == cmd_histo_min)
-    detector -> set_histo_min
+    detector -> setHistoEnergyMinimum
       (cmd_histo_min -> GetNewDoubleValue(newValue));
   if(command == cmd_histo_max)
-    detector -> set_histo_max
+    detector -> setHistoEnergyMaximum
       (cmd_histo_max -> GetNewDoubleValue(newValue));
   
 }
