@@ -271,7 +271,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     //get pointer to sensitive detector manager:
     G4SDManager *det_manager = G4SDManager::GetSDMpointer();
 
-    /* Detector inside the box. */
+    /* Detector inside the box.
+     * This detector shall be registered in vector: pbDetectorSDArray.*/
     DetectorSD2  *sensDetectorPtr =
             newCylindricDetector(world_log,
                                  "MYDETECTOR",
@@ -282,9 +283,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
     /*Register new detector in DetectorManager:*/
     det_manager->AddNewDetector(sensDetectorPtr);
-    /*Register this 'virtual' detector in array, this will let SteppingAction class
-    to store information about particles to known detectors.*/
-    pbDetectorSDArray.push_back(sensDetectorPtr);
     /* Make detector virtual (counts only kinetic energy, no deposited energy)*/
     sensDetectorPtr->DisableDepositedEnergyCount();
 
