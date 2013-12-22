@@ -32,8 +32,7 @@
 
 DetectorConstruction::DetectorConstruction()
 {
-    /*Set energy range from 0 to 310MeV*/
-    setHistoRanges(0, 310 * 1e03, 10000);
+
 }
 
 DetectorConstruction::~DetectorConstruction() 
@@ -56,35 +55,9 @@ DetectorSD2 * DetectorConstruction::newRegisteredDetectorSD2(const G4String name
     //now pull out the pointer:
     std::vector<DetectorSD2*>::iterator iter =
             pbDetectorSDArray.end()-1;
-    (*iter)->fill_hist("e-", 0);
-    (*iter)->fill_hist("e+", 0);
-    (*iter)->fill_hist("gamma", 0);
-    (*iter)->fill_hist_deposited("e-", 0);
-    (*iter)->fill_hist_deposited("e+", 0);
-    (*iter)->fill_hist_deposited("gamma", 0);
     return (*iter);
 }
 
-/** 
-    Read parameters values from a map<G4String, G4double>;
-    Possible G4Sting keys are:
-    "tathick", "tadiam", "tgthick", "tgdiam", "tgmass", "althick", "aldiam".
-    example1:
-    If map contains a pair of values like: "tgmass" and 0.200*g,
-    then target detector mass will be set to 0.2g.
-    
-    //one may actually use this code :
-    str_double_map.insert( std::pair<G4String, G4double>
-    ("tgmass", 0.200*g));
-    //to insert that values into map
-    
-    example2:
-    If map contains a pair of values: "tathick" and 0.100*cm,
-    then Ta-plate thickness will be set to 0.1*cm.
-    
-    \param std::map reference(a container with G4String and G4double pairs).
-
-*/
 void DetectorConstruction::readParameters(const std::map< G4String, G4double > &str_double_map)
 {
     std::map< G4String, G4double >::const_iterator str_double_iterator;
@@ -103,31 +76,6 @@ void DetectorConstruction::readParameters(const std::map< G4String, G4double > &
 
 }
 
-/** Set histogram properties.
-    \param minimum value of range.
-    Anything lesser than this setpoint will be ignored.
-
-    \param maximum value of range.
-    Anything greater than this setpoint will be ignored.
-
-    \param Quantity of histogram bins.
-*/
-void DetectorConstruction::setHistoRanges(const double min,
-                                          const double max,
-                                          const unsigned int n_bins,
-                                          const unsigned int E_units)
-{
-    //lets build it up:
-
-    d_hist_min = min;
-    d_hist_max = max;
-    if(d_hist_max < d_hist_min)//if somehow on Earth..
-    {
-        d_hist_max = min;  d_hist_min = max;
-    }
-    d_hist_bins = n_bins;
-    d_energy_units = E_units;
-}
 //-----------------------------------------------------------------------------
 
 /** This macros adds new sensitive detector.
@@ -194,23 +142,6 @@ DetectorSD2 * DetectorConstruction::newBoxDetector(G4LogicalVolume *worldLogical
     detectorLogicalPointer = detectorBox->get_logical();
     detectorLogicalPointer->SetSensitiveDetector(sd2Pointer);
     return sd2Pointer;
-}
-//-------------------------------------------------------------------------------
-void DetectorConstruction::setHistoBinsQuantity(const G4int bins)
-{
-    d_hist_bins = bins;
-}
-void DetectorConstruction::setHistoEnergyMinimum(const G4double min)
-{
-    d_hist_min = min;
-}
-void DetectorConstruction::setHistoEnergyMaximum(const G4double max)
-{
-    d_hist_max = max;
-}
-unsigned DetectorConstruction::getHistoEnergyUnits()
-{
-    return d_energy_units;
 }
 //-------------------------------------------------------------------------------
 G4VPhysicalVolume* DetectorConstruction::Construct()

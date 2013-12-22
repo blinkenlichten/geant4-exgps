@@ -130,14 +130,6 @@ int main(int argc, char** argv)
 
   DetectorConstruction *construction_unit = new DetectorConstruction();
 
-  // //Set initial options values and read some of them from argv:
-  // std::map<G4String, G4double> str_double_map;
-  // process_arguments(argc, argv, str_double_map);
-  // //set construction's configuration from the map with params:
-  // construction_unit->read_parameters(str_double_map);
-
-  construction_unit->setHistoRanges(0,MAX_HIST,12500,1);
-
   
   PrimaryGeneratorAction *gen_action = new PrimaryGeneratorAction();
   //set gen_action's configuration from the map with params:

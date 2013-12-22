@@ -73,41 +73,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
   */
   void readParameters(const std::map<G4String, G4double> &str_double_map);
   
-  /** Set histogram properties.
-      \param minimum value of range. 
-      Anything lesser than this setpoint will be ignored.
-      
-      \param maximum value of range. 
-      Anything greater than this setpoint will be ignored.
-      
-      \param Quantity of histogram bins.
-      
-      \param energy units: 0 -- eV, 1 -- keV, 2 -- MeV
-  */
-  void setHistoRanges(const double min, const double max,
-		 const unsigned int n_bins, 
-		 const unsigned int E_units=1);
-  
-  /** Set number of histogram bins.
-      \param quantity of bins.
-   */
-  void setHistoBinsQuantity(const G4int bins);
 
-  /** Set number of histogram min value.
-      \param a value in units that are currently set, keV by default.
-   */
-  void setHistoEnergyMinimum(const G4double min);
-
-  /** Set number of histogram max value.
-      \param a value in units that are currently set, keV by default.
-   */
-  void setHistoEnergyMaximum(const G4double max);
-
-  /**Return value of energy units used.
-     \return energy units used: case 0: eV, case 1: keV, case 2: MeV.
-   */
-  unsigned getHistoEnergyUnits();
-  
 protected:
   /**
      Create a new object of DetectorSD class and record it's
@@ -152,10 +118,6 @@ protected:
 private:
 
   DetectorConstructionMessenger *messenger;
-  
-  double d_hist_min, d_hist_max;
-  unsigned d_hist_bins;
-  unsigned  d_energy_units;
 
 };
 

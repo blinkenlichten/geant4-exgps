@@ -130,9 +130,9 @@ public:
       \param pointer_physical : target G4VPhysicalVolume pointer, will be changed.
       \return 'true' if the object is valid, 'false' otherwise (you should not use obtained pointers then).
   */
-  bool get(  G4Tubs *pointer_tubs,
-	     G4LogicalVolume *pointer_logical,
-	     G4VPhysicalVolume *pointer_physical)
+  bool get(  G4Tubs*& pointer_tubs,
+         G4LogicalVolume*& pointer_logical,
+         G4VPhysicalVolume*& pointer_physical)
   {
     pointer_tubs = tubs;
     pointer_logical = logical;
@@ -211,9 +211,9 @@ public:
       \param pointer_physical : target G4VPhysicalVolume pointer, will be changed.
       \return 'true' if the object is valid, 'false' otherwise (you should not use obtained pointers then).
   */
-  bool get(  G4Box *pointer_box,
-	     G4LogicalVolume *pointer_logical,
-	     G4VPhysicalVolume *pointer_physical)
+  bool get(  G4Box*& pointer_box,
+         G4LogicalVolume*& pointer_logical,
+         G4VPhysicalVolume*& pointer_physical)
   {
     pointer_box = p_box;
     pointer_logical = logical;

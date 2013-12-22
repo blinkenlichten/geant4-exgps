@@ -43,51 +43,15 @@ DetectorConstructionMessenger::DetectorConstructionMessenger(DetectorConstructio
   valueDir -> SetGuidance("Construction parameters");
        
   
-  cmd_histo_bins =  new G4UIcmdWithAnInteger("/construction/hist_bins",this);
-  cmd_histo_bins -> SetGuidance("number of histogramm bins."); 
-  cmd_histo_bins -> SetParameterName("Number",true);
-  cmd_histo_bins -> SetRange("Size>=0.");
-  cmd_histo_bins -> AvailableForStates(G4State_Idle); 
-
-  cmd_histo_min =  new G4UIcmdWithADoubleAndUnit("/construction/hist_min",this);
-  cmd_histo_min -> SetGuidance("min value of energy histogramms"); 
-  cmd_histo_min -> SetParameterName("Size",true);
-  cmd_histo_min -> SetRange("Size>=0.");
-  cmd_histo_min -> SetUnitCategory("Length");
-  cmd_histo_min -> AvailableForStates(G4State_Idle); 
-
-  cmd_histo_max =  new G4UIcmdWithADoubleAndUnit("/construction/hist_max",this);
-  cmd_histo_max -> SetGuidance("max value of energy histogramms"); 
-  cmd_histo_max -> SetParameterName("Size",true);
-  cmd_histo_max -> SetRange("Size>=0.");
-  cmd_histo_max -> SetUnitCategory("Length");
-  cmd_histo_max -> AvailableForStates(G4State_Idle); 
-    
-  
 }
 
 DetectorConstructionMessenger::~DetectorConstructionMessenger()
 {
-  delete cmd_histo_bins;
-  delete cmd_histo_min;
-  delete cmd_histo_max;
-
   delete valueDir;
 }
 
 void DetectorConstructionMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 { 
-  
-  if(command == cmd_histo_bins)
-    detector -> setHistoBinsQuantity
-      (cmd_histo_bins -> GetNewIntValue(newValue));
-  
-  if(command == cmd_histo_min)
-    detector -> setHistoEnergyMinimum
-      (cmd_histo_min -> GetNewDoubleValue(newValue));
-  if(command == cmd_histo_max)
-    detector -> setHistoEnergyMaximum
-      (cmd_histo_max -> GetNewDoubleValue(newValue));
-  
+
 }
 

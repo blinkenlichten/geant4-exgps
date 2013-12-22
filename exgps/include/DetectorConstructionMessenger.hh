@@ -60,17 +60,7 @@ private:
    */
   G4UIdirectory*         valueDir;
   
-  /** Set number of histogram bins. */
-  G4UIcmdWithAnInteger* cmd_histo_bins;
 
-
-  /** Set number of histogram min value. */
-  G4UIcmdWithADoubleAndUnit* cmd_histo_min;
-
-
-  /** Set number of histogram max value.  */
-  G4UIcmdWithADoubleAndUnit* cmd_histo_max;
-    
 
 };
   
