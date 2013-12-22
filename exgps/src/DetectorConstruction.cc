@@ -32,7 +32,8 @@
 
 DetectorConstruction::DetectorConstruction()
 {
-
+    /*Set energy range from 0 to 310MeV*/
+    setHistoRanges(0, 310 * 1e03, 10000);
 }
 
 DetectorConstruction::~DetectorConstruction() 
@@ -112,9 +113,9 @@ void DetectorConstruction::readParameters(const std::map< G4String, G4double > &
     \param Quantity of histogram bins.
 */
 void DetectorConstruction::setHistoRanges(const double min,
-                                     const double max,
-                                     const unsigned int n_bins,
-                                     const unsigned int E_units)
+                                          const double max,
+                                          const unsigned int n_bins,
+                                          const unsigned int E_units)
 {
     //lets build it up:
 
@@ -141,7 +142,8 @@ DetectorSD2 * DetectorConstruction::newCylindricDetector(G4LogicalVolume *worldL
                                                          G4Material * detMaterialPtr,
                                                          G4ThreeVector centerPlacement,
                                                          G4double cylinderDiameter,
-                                                         G4double cylinderHeight)
+                                                         G4double cylinderHeight,
+                                                         G4RotationMatrix* pRotationMatrix)
 {
     /** detector logical volume.*/
     G4LogicalVolume *detectorLogicalPointer;
@@ -149,7 +151,9 @@ DetectorSD2 * DetectorConstruction::newCylindricDetector(G4LogicalVolume *worldL
 
     detectorCylinder =   make_cylinder(worldLogical,
                                        detName + G4String("_cylinder"),
-                                       detMaterialPtr,  centerPlacement, cylinderDiameter, cylinderHeight);
+                                       detMaterialPtr,  centerPlacement,
+                                       cylinderDiameter, cylinderHeight, 0,
+                                       pRotationMatrix);
 
     DetectorSD2 *sd2Pointer = newRegisteredDetectorSD2(detName);
     detectorLogicalPointer = detectorCylinder->get_logical();
@@ -171,8 +175,7 @@ DetectorSD2 * DetectorConstruction::newBoxDetector(G4LogicalVolume *worldLogical
                                                    G4Material * detMaterialPtr,
                                                    G4ThreeVector centerPlacement,
                                                    G4ThreeVector boxHalfDimensions,
-                                                   G4RotationMatrix* pRotationMatrix = 0
-                                                   )
+                                                   G4RotationMatrix* pRotationMatrix)
 {
     /** detector logical volume.*/
     G4LogicalVolume *detectorLogicalPointer;
@@ -212,130 +215,70 @@ unsigned DetectorConstruction::getHistoEnergyUnits()
 //-------------------------------------------------------------------------------
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
+    // --- materials ---
+    // создаем материалы
+    // первый способ:
+    G4Element* Tl = new G4Element("Tantal", "Tl", 73, 180.9479*g/mole);
 
-    //Матеріали
+    G4Material* TargetMaterial = new G4Material("TargetMaterial", 16.65*g/cm3, 1);
+    TargetMaterial->AddElement(Tl, 100*perCent);
+
+
+    // второй способ: использует встроенную в Geant4 базу материалов
+    // более простой, но иногда приходится прибегать к первому способу,
+    // т.к. не все материалы содержатся в базе
     G4NistManager* nistMan = G4NistManager::Instance();
-    G4Material* vacuum = nistMan->FindOrBuildMaterial("G4_Galactic");
-    // Все в боксі. Бокс має повітря. Шестикутна призма - графіт.
-    // G4NistManager* nistMan = G4NistManager::Instance();
     G4Material* Air = nistMan->FindOrBuildMaterial("G4_AIR");
-    G4Material* saMaterial = nistMan->FindOrBuildMaterial("G4_GRAPHITE");
-    // Детектор - нержавіюча сталь AISI 304 (взято з Вікі)
-    G4Element* Fe = new G4Element("Ferum"  , "Fe", 26, 55.847*g/mole);
-    G4Element* Cr = new G4Element("Chrom"  , "Cr", 24, 51.9961*g/mole);
-    G4Element* Ni = new G4Element("Nikel"  , "Ni", 28, 58.6934*g/mole);
-    G4Element* C = new G4Element("Carbon"  , "C", 6, 12.011*g/mole);
-    G4Element* Mn = new G4Element("Mangan"  , "Mn", 25, 54.93805*g/mole);
-    G4Element* P = new G4Element("Phosphor"  , "P", 15, 30.9737*g/mole);
-    G4Element* S = new G4Element("Sirka"  , "S", 16, 32.066*g/mole);
-    G4Element* Cu = new G4Element("Cuprum"  , "Cu", 29, 63.546*g/mole);
-    G4Material* UnrustIron = new G4Material("UnrustIron", 8*g/cm3, 8);
-    UnrustIron->AddElement(Fe, 70*perCent);
-    UnrustIron->AddElement(Cr, 18*perCent);
-    UnrustIron->AddElement(Ni, 9*perCent);
-    UnrustIron->AddElement(C, 0.08*perCent);
-    UnrustIron->AddElement(Mn, 2*perCent);
-    UnrustIron->AddElement(P, 0.045*perCent);
-    UnrustIron->AddElement(S, 0.03*perCent);
-    UnrustIron->AddElement(Cu, 0.845*perCent);
+    G4Material* saMaterial = nistMan->FindOrBuildMaterial("G4_Al");
+    //G4Material* detMaterial = nistMan->FindOrBuildMaterial("G4_SODIUM_IODIDE");
+    G4Element *H = new G4Element("Hydrogen","H",1,1*g/mole);
 
-    //---------------------------------------------------------------
-    // робимо геометрію
-    //---------------------------------------------------------------
+    G4Material *void_dumb_material =  new G4Material("dumb_void", 1e-10*g/cm3, 1);
+    void_dumb_material->AddElement(H,1);
 
-    //-------- world box-------------------------
-    // світ -- він і є "світ", тут будуть розташовані всі об'єкти:
-    G4Box *world_box = new G4Box("WORLD_BOX",
-                                 //3 параметри паралелепіпеда X,Y,Z
-                                 2 * m,
-                                 2 * m,
-                                 2 * m);
+    // --- volumes ---
+    // создаем геометрию
+    G4double saSize = 3*cm; // размер образца
+    G4double saThick = 0.5*mm; // толщина образца
+    G4double detDiam = 3*cm; // диаметр детектора
+    G4double detThick = 1*mm; // толщина детектора
+    G4double gap1 = 5*cm; // расстояние от источника до образца
+    G4double gap2 = 10*cm; // расстояние от образца до детектора
 
-    // заповним повітрям лабораторию:
-    G4LogicalVolume *world_logical_volume =
-            new G4LogicalVolume(world_box, Air,	"WORLD_LOG");
+    // мировой объем в виде параллелепипеда
+    G4Box* world_box = new G4Box("world", (saSize + detDiam)/2 + 1*cm, (saSize + detDiam)/2 + 1*cm, gap1 + gap2 + detThick/2 + 6*cm);
+    // заполняем его воздухом
+    G4LogicalVolume* world_log = new G4LogicalVolume(world_box, Air, "world");
+    // и помещаем в начало координат
+    G4VPhysicalVolume* world_physical_volume = new G4PVPlacement(0, G4ThreeVector(), world_log, "world", 0, false, 0);
 
-    G4VPhysicalVolume *world_physical_volume =
-            new G4PVPlacement( 0,
-                               G4ThreeVector(),
-                               world_logical_volume,
-                               "WORLD_PHYS",
-                               0, false, 0);
-    //---------------------------------------------
-    G4double zplane[]={-0.25*m, 0.25*m};
-    G4double rin[]={0*m,0*m};
-    G4double rout[]={135*mm,135*mm};
-    G4Polyhedra* sample_box = new G4Polyhedra("sample", 0 , 2*pi,6,2, zplane,rin,rout);
-    // образец
-    G4LogicalVolume* sample_log = new G4LogicalVolume(sample_box, saMaterial, "sample");
-    // помещаем его в мировой объем
-    G4VPhysicalVolume* sample_phys = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), sample_log, "sample", world_logical_volume, false, 0);
+    g4solid_object<G4Box>* sample_box_p =
+            make_box(world_log, "sample", TargetMaterial,
+                    /*placement*/ G4ThreeVector(0, 0, gap1 + saThick / 2.0),
+                   /*half sizes*/G4ThreeVector(saSize/2.0, saSize/2.0, saThick/2.0));
 
-    //UnrustIron- material of the sample
-
-    // детектор в виде цилиндра
-    //  G4Box* det_tube = new G4Box("detector", 0.25*m, 0.1*m, 0.25*m);
-    //G4Tubs* det_tube = new G4Tubs("detector", 0, detDiam/2, detThick/2, 0, 360*deg);
-    // G4LogicalVolume* det_log = new G4LogicalVolume(det_tube, vacuum, "detector");
-    // помещаем его в мировой объем со смещением на gap1+gap2
-    // G4VPhysicalVolume* det_phys = new G4PVPlacement(0, G4ThreeVector(0, 0.5*m, 0), det_log, "detector", world_logical_volume, false, 0);
-
-
-    // калориметр
-    G4Box* calor_box = new G4Box("calorimeter", 1*m,1*m,25*cm);
-    G4LogicalVolume* calor_log = new G4LogicalVolume(calor_box, Air, "calorimeter");
-    G4VPhysicalVolume* calor_phys =
-            new G4PVPlacement(0, G4ThreeVector(0, gap + calorThick/2, 0),
-                              calor_log,
-                              "calorimeter",
-                              world_logical_volume, false, 0);
-
-    // слой
-    G4Box* layer_box = new G4Box("layer", 25*cm, 5*cm, layerThick/2);
-    G4LogicalVolume* layer_log = new G4LogicalVolume(layer_box, vacuum, "layer");
-
-    // помещаем внутрь калориметра nLayers слоев (копий объекта layer_log)
-    // задается направление вдоль которого будут размещены слои (kZAxis) и толщина слоя
-    G4PVReplica* layer_phys = new G4PVReplica("layer", layer_log, calor_log, kZAxis, nLayers, layerThick);
-    G4VPhysicalVolume *det_phys[50][10];
-    // детектор
-    G4LogicalVolume* det_log;
-    if (detThick > 0.) {
-        G4Box* det_box = new G4Box("detector", size/2, size/2, detThick/2);
-        det_log = new G4LogicalVolume(det_box, UnrustIron, "detector");
-        // входит в соfor став слоя (abs_log)
-        for(int j=0; j<10; j++)
-        { for(int i=0;i<50;i++)
-                det_phys[i][j] =
-                        new G4PVPlacement(0,
-                                          G4ThreeVector( i*size/2-12*size, j*size/2-3*size , 0),
-                                          det_log, "detector", layer_log, false, 0);
-        }
-    }
+    g4solid_object<G4Tubs>* al_tube_p = make_cylinder(world_log, "poseredini",
+                                                      saMaterial,
+                                                      G4ThreeVector(0, 0, gap1 + saThick + 5*cm),
+                                                      /*outer radius*/ 2 * cm,
+                                                      /*height*/ 5 * cm);
 
     //---------------------------------------------
     // --- visualisation ---
-    // отключаем отображение мирового объема
-
     // abs_log->SetVisAttributes(G4VisAttributes(G4Colour::Green()));
-    layer_log->SetVisAttributes(G4VisAttributes::Invisible);
-
     world_log->SetVisAttributes(G4VisAttributes::Invisible);
-    calor_log->SetVisAttributes(G4VisAttributes::Invisible);
-    sample_log->SetVisAttributes(G4VisAttributes(G4Colour::Yellow()));
-    //---------------------------------------------
 
     //get pointer to sensitive detector manager:
     G4SDManager *det_manager = G4SDManager::GetSDMpointer();
 
     /* Detector inside the box. */
     DetectorSD2  *sensDetectorPtr =
-            newCylindricDetector(world_logical_volume,
-                                 "DET.INSIDE",
+            newCylindricDetector(world_log,
+                                 "MYDETECTOR",
                                  /*void material, this detector is virtual:*/void_dumb_material,
-                                 /*placement:*/G4ThreeVector(0,0,-10.15*m),
-                                 /*cylinder diameter*/1.3*m,
-                                 /*cylinder height*/  10*cm);
+                                 /*placement:*/G4ThreeVector(0, 0, gap1 + saThick + gap2 + detThick / 2.0),
+                                 /*cylinder diameter*/detDiam,
+                                 /*cylinder height*/  detThick);
 
     /*Register new detector in DetectorManager:*/
     det_manager->AddNewDetector(sensDetectorPtr);

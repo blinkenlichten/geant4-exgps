@@ -38,8 +38,8 @@
 
 PrimaryGeneratorAction::PrimaryGeneratorAction()
 {
-  source_position = G4ThreeVector(0,0, 8 * m);
-  particle_momentum = G4ThreeVector(0,0, -1.0);
+  source_position = G4ThreeVector(0, 0, 0);
+  particle_momentum = G4ThreeVector(0, 0, 1.0);
   beam_diameter = 0.9*cm;
   real_electron_beam=true;
   // создаем источник частиц
@@ -51,7 +51,9 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
   
   // устанавливаем тип и энергию частиц, координаты положения источника
   particleGun->SetParticleDefinition(electron);
-  //  particleGun->SetParticleEnergy(particle_energy*keV);
+
+  /** Energy set from .mac file*/
+//  particleGun->SetParticleEnergy(0.3 * GeV);
   particleGun->SetParticlePosition(source_position);
   particleGun->SetParticleMomentumDirection(particle_momentum);
 }
@@ -72,11 +74,11 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
 {
-  // задаем случайное направление излучения
-  if(real_electron_beam)
-    {
-      source_position = G4ThreeVector(beam_diameter*drand48(),beam_diameter*drand48(),0);
-    }
+//  //(может быть) задаем случайное направление излучения
+//  if(real_electron_beam)
+//    {
+//      source_position = G4ThreeVector(beam_diameter*drand48(),beam_diameter*drand48(),0);
+//    }
   
   particleGun->SetParticlePosition(source_position);
   particleGun->SetParticleMomentumDirection(particle_momentum);

@@ -130,7 +130,24 @@ protected:
                                   G4Material * detMaterialPtr,
                                   G4ThreeVector centerPlacement,
                                   G4double cylinderDiameter,
-                                  G4double cylinderHeight);
+                                  G4double cylinderHeight,
+                                  G4RotationMatrix* pRotationMatrix = 0);
+  /** This macros adds new sensitive detector.
+ *  @param detName: (G4String) detector's name.
+ *  @param detMaterialPtr: (G4Material*) pointer to detector's material.
+ *  @param centerPlacement: (G4ThreeVector) radius vector of the detector's center.
+ *	@param boxHalfDimensions: vector of half sizes of the box (x/2, y/2, z/)
+ *	@param pRotationMatrix: (optional) pointer to rotation matrix,
+ * the object shall be rotated if not NULL.
+ *	@return pointer to newly created DetectorSD2 object.
+**/
+  DetectorSD2 * newBoxDetector(G4LogicalVolume *worldLogical,
+                               G4String detName,
+                               G4Material * detMaterialPtr,
+                               G4ThreeVector centerPlacement,
+                               G4ThreeVector boxHalfDimensions,
+                               G4RotationMatrix* pRotationMatrix = 0);
+
   
 private:
 
